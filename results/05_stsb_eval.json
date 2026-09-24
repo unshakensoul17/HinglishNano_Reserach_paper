@@ -1,0 +1,65 @@
+{
+  "HinglishNano V5 (INT8)": {
+    "spearman_rho": 65.33,
+    "ci_95": [
+      62.3,
+      68.3
+    ],
+    "pearson_r": 65.0,
+    "status": "No quantization degradation vs FP32"
+  },
+  "HinglishNano V5 (FP32)": {
+    "spearman_rho": 65.3,
+    "ci_95": [
+      62.3,
+      68.3
+    ],
+    "pearson_r": 64.99,
+    "status": "Baseline student"
+  },
+  "all-MiniLM-L6-v2 (Fine-Tuned)": {
+    "spearman_rho": 86.2,
+    "ci_95": [
+      84.5,
+      87.8
+    ],
+    "pearson_r": 86.1,
+    "status": "Teacher retains English ability"
+  },
+  "all-MiniLM-L6-v2 (Teacher Zero-Shot)": {
+    "spearman_rho": 86.72,
+    "ci_95": [
+      85.1,
+      88.2
+    ],
+    "pearson_r": 86.96,
+    "status": "Dedicated general English embedder"
+  },
+  "BAAI/bge-small-en-v1.5": {
+    "spearman_rho": 88.92,
+    "ci_95": [
+      87.6,
+      90.1
+    ],
+    "pearson_r": 88.28,
+    "status": "Dedicated general English embedder"
+  },
+  "l3cube-pune/hing-roberta (278M)": {
+    "spearman_rho": 64.93,
+    "ci_95": [
+      61.7,
+      67.9
+    ],
+    "pearson_r": 60.03,
+    "status": "Code-mixed reference encoder"
+  },
+  "TinyBERT-4L-312D (14.4M)": {
+    "spearman_rho": 62.94,
+    "ci_95": [
+      59.6,
+      66.2
+    ],
+    "pearson_r": 59.95,
+    "status": "Compact general encoder"
+  }
+}

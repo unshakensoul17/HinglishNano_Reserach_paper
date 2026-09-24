@@ -1,0 +1,86 @@
+{
+  "HinglishNano V5 (FP32)": {
+    "params_m": 7.77,
+    "format": "FP32 ONNX",
+    "size_mb": 29.83,
+    "ram_rss_mb": 42.1,
+    "p50_ms": 8.3,
+    "p90_ms": 8.95,
+    "p95_ms": 9.2,
+    "p99_ms": 10.4,
+    "qps": 120.5,
+    "heads": "5 Unified"
+  },
+  "HinglishNano V5 (INT8)": {
+    "params_m": 7.77,
+    "format": "INT8 ONNX",
+    "size_mb": 7.7,
+    "ram_rss_mb": 18.5,
+    "p50_ms": 9.2,
+    "p90_ms": 10.2,
+    "p95_ms": 10.8,
+    "p99_ms": 12.1,
+    "qps": 108.7,
+    "heads": "5 Unified"
+  },
+  "all-MiniLM-L6-v2 (FP32)": {
+    "params_m": 22.7,
+    "format": "FP32 ONNX",
+    "size_mb": 86.6,
+    "ram_rss_mb": 94.3,
+    "p50_ms": 20.09,
+    "p90_ms": 21.3,
+    "p95_ms": 21.93,
+    "p99_ms": 24.5,
+    "qps": 49.3,
+    "heads": "1 (Emb only)"
+  },
+  "all-MiniLM-L6-v2 (INT8)": {
+    "params_m": 22.7,
+    "format": "INT8 ONNX",
+    "size_mb": 21.9,
+    "ram_rss_mb": 35.8,
+    "p50_ms": 17.0,
+    "p90_ms": 18.4,
+    "p95_ms": 19.2,
+    "p99_ms": 21.0,
+    "qps": 58.8,
+    "heads": "1 (Emb only)"
+  },
+  "BAAI/bge-small-en-v1.5 (INT8)": {
+    "params_m": 33.4,
+    "format": "INT8 ONNX",
+    "size_mb": 32.3,
+    "ram_rss_mb": 48.0,
+    "p50_ms": 33.5,
+    "p90_ms": 36.2,
+    "p95_ms": 38.1,
+    "p99_ms": 42.3,
+    "qps": 29.8,
+    "heads": "1 (Emb only)"
+  },
+  "l3cube-pune/hing-roberta (INT8)": {
+    "params_m": 278.0,
+    "format": "INT8 ONNX",
+    "size_mb": 265.9,
+    "ram_rss_mb": 312.0,
+    "p50_ms": 108.9,
+    "p90_ms": 118.4,
+    "p95_ms": 124.5,
+    "p99_ms": 138.0,
+    "qps": 9.2,
+    "heads": "1 (Encoder)"
+  },
+  "TinyBERT-4L-312D (INT8)": {
+    "params_m": 14.4,
+    "format": "INT8 ONNX",
+    "size_mb": 13.9,
+    "ram_rss_mb": 24.2,
+    "p50_ms": 8.6,
+    "p90_ms": 9.4,
+    "p95_ms": 9.8,
+    "p99_ms": 11.0,
+    "qps": 116.3,
+    "heads": "1 (Encoder)"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "precision_comparison": {
+    "FP32": {
+      "size_mb": 29.83,
+      "p50_latency_ms": 8.3,
+      "qps": 120.5,
+      "stsb_rho": 65.3,
+      "full_corpus_r1": 88.0,
+      "full_corpus_r10": 99.33,
+      "hard_negative_margin": 0.176
+    },
+    "INT8 (Dynamic QUInt8)": {
+      "size_mb": 7.7,
+      "p50_latency_ms": 9.2,
+      "qps": 108.7,
+      "stsb_rho": 65.33,
+      "full_corpus_r1": 88.0,
+      "full_corpus_r10": 99.67,
+      "hard_negative_margin": 0.175
+    }
+  },
+  "compression_ratio": "3.87x (29.83 MB -> 7.70 MB)",
+  "accuracy_impact": "No measurable degradation within evaluation resolution (< 0.03 rho difference)",
+  "quantization_operators": [
+    "MatMul",
+    "Gather"
+  ],
+  "weight_type": "QUInt8 (dynamic activations, per-channel quantized weights)"
+}
