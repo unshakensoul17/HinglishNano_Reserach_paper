@@ -12,7 +12,7 @@
 \newcommand{\nano}{\textsc{HinglishNano}}
 \setlength{\tabcolsep}{4pt}
 
-\title{\textbf{\nano{}-V5: A 7.7\,MB Multi-Task Encoder with\\ Deployment-Grade Retrieval Fidelity for Code-Mixed Hindi--English}}
+\title{\textbf{\nano{}-V5: An Ultra-Compact Multi-Task Encoder for\\ Code-Mixed Conversational Memory on Edge Devices}}
 \author{\textbf{Akash Yaduwanshi}\\ \texttt{aakashyaduwanshi0470@gmail.com}}
 \date{September 2026}
 
@@ -20,7 +20,7 @@
 \maketitle
 
 \begin{abstract}
-\nano{}-V5 is a 7.77M-parameter transformer (7.7\,MB dynamic INT8, 9.2\,ms single-thread CPU $P_{50}$) that produces, in a single forward pass, a 384-dimensional retrieval embedding together with memory-gating, domain, temporal-scope, and named-entity predictions for code-mixed Hindi--English (Hinglish). On a held-out full-corpus retrieval task (300 queries against 1{,}245 candidate memories), \nano{} INT8 retrieves the correct memory within the top-10 for 99.7\% of queries---statistically indistinguishable from an \texttt{all-MiniLM-L6-v2} fine-tuned on the identical split (100.0\%; $\Delta=1/300$ queries, paired bootstrap CI $[-1.0,+0.0]$ points)---while using $2.9\times$ fewer parameters, a $2.8\times$ smaller INT8 footprint, and $1.9\times$ higher single-thread throughput ($P_{50}$ 9.2 vs.\ 17.0\,ms). The fine-tuned teacher retains a significant 4.0-point top-1 advantage (88.0 vs.\ 92.0 R@1, paired $p=0.023$), which we report openly; a budget-matched control further shows that a shorter fine-tuning schedule (3 epochs, 195 steps) reverses the ranking entirely, a baseline pitfall we argue is common in small-model evaluations. Zero-shot general-purpose embedders collapse at corpus scale (57--67 R@1), and a 278M Hinglish-domain encoder loses 24.3 R@1 points when the candidate pool grows from 20 to 1{,}245---a degradation predictable from its embedding margin ($+0.03$). We release the held-out test split, all benchmark scripts, and per-query results.
+\nano{}-V5 is a 7.77M-parameter transformer (7.7\,MB dynamic INT8 ONNX, 9.2\,ms single-thread CPU $P_{50}$) that produces, in a single forward pass, a 384-dimensional retrieval embedding together with memory-gating, domain, temporal-scope, and named-entity predictions for code-mixed Hindi--English (Hinglish). On a held-out full-corpus retrieval task (300 queries against 1{,}245 candidate memories), \nano{} INT8 retrieves the correct memory within the top-10 for 99.7\% of queries---statistically comparable to an \texttt{all-MiniLM-L6-v2} teacher fine-tuned on the identical split (100.0\%; paired $\Delta=1/300$ queries, bootstrap CI $[-1.0,+0.0]$ points)---while using $2.9\times$ fewer parameters, a $2.8\times$ smaller INT8 footprint, and $1.9\times$ higher single-thread throughput ($P_{50}$ 9.2 vs.\ 17.0\,ms). The fine-tuned teacher retains a significant 4.0-point top-1 advantage (88.0 vs.\ 92.0 R@1, paired $p=0.023$), which we report openly; a fine-tuning schedule control further shows that a shorter fine-tuning schedule (3 epochs, 195 steps) reverses the ranking entirely, a baseline pitfall we argue is common in small-model evaluations. Zero-shot general-purpose embedders collapse at corpus scale (57--67 R@1), and a 278M Hinglish-domain encoder loses 24.3 R@1 points when the candidate pool grows from 20 to 1{,}245---a degradation correlated with its embedding margin ($+0.03$). We release the held-out test split, all benchmark scripts, and per-query results.
 \end{abstract}
 
 \section{Introduction}
@@ -28,12 +28,12 @@ Conversational memory engines that run on personal devices must, for every utter
 
 We present \nano{}-V5, a single 5-layer, $d{=}384$ transformer that answers all of the above in one forward pass via five output heads, at 7.77M parameters and a 7.7\,MB dynamic-INT8 ONNX artifact. The model is trained from scratch on a 24K-utterance Hinglish memory corpus with embedding-level distillation from \texttt{all-MiniLM-L6-v2} and in-batch InfoNCE.
 
-The second contribution of this paper is evaluation rigor, which we treat as load-bearing rather than cosmetic. Small-model papers are frequently compared against zero-shot or undertrained large baselines; both failure modes occurred in early versions of our own evaluation and were caught only by explicit controls. Our protocol therefore includes: (i) a held-out split with explicit contamination guards; (ii) canonical pooling for every baseline (BGE is CLS-pooled; mean-pooling it deflates a SOTA baseline by several points); (iii) a pinned single-thread CPU latency protocol with INT8-ONNX exports for all systems; (iv) paired bootstrap significance on identical query sets; and (v) a budget-matched fine-tuning control for the strongest baseline.
+The second contribution of this paper is evaluation rigor, which we treat as load-bearing rather than cosmetic. Small-model papers are frequently compared against zero-shot or undertrained large baselines; both failure modes occurred in early versions of our own evaluation and were caught only by explicit controls. Our protocol therefore includes: (i) a held-out split with explicit contamination guards; (ii) canonical pooling for every baseline (BGE is CLS-pooled; mean-pooling it deflates a strong baseline by several points); (iii) a pinned single-thread CPU latency protocol with INT8-ONNX exports for all systems; (iv) paired bootstrap significance on identical query sets; and (v) a fine-tuning schedule control for the strongest baseline.
 
 Our contributions:
 \begin{itemize}\itemsep2pt
 \item \textbf{Model.} A 7.77M-parameter, 5-head multi-task encoder for Hinglish memory retrieval; 7.7\,MB INT8 at 9.2\,ms single-thread $P_{50}$, with quantization measured to be quality-free (STS-B $\rho$ 65.33 vs.\ 65.30).
-\item \textbf{Deployment-grade fidelity.} Full-corpus R@10 of 99.7\%, statistically indistinguishable from its budget-matched fine-tuned 22.7M teacher ($\Delta = 1/300$ queries), at $2.9\times$ fewer parameters and $1.9\times$ the throughput, plus four auxiliary heads at no additional forward pass.
+\item \textbf{High-recall retrieval.} Full-corpus R@10 of 99.7\%, statistically comparable to its fine-tuned 22.7M teacher ($\Delta = 1/300$ queries, paired bootstrap CI $[-1.00, +0.00]$), at $2.9\times$ fewer parameters and $1.9\times$ the throughput, plus four auxiliary heads in a single forward pass.
 \item \textbf{Honest negative results.} The teacher retains a significant 4.0-point R@1 advantage ($p=0.023$); our English STS-B trails dedicated embedders by 21.4 points; our tokenizer-fragmentation hypothesis for the in-domain gap was \emph{not} supported (only $1.24\times$).
 \item \textbf{Robustness analysis.} Embedding margin predicts candidate-set-scaling degradation: a 278M Hinglish encoder with margin $+0.03$ loses 24.3 R@1 points from 20 to 1{,}245 candidates, while \nano{} (margin $+0.18$) loses 4.0.
 \item \textbf{A baseline pitfall, quantified.} Fine-tuning the teacher for 3 instead of 30 epochs reverses the model ranking entirely (79.0 vs.\ 99.0 R@1), showing how easily small-model papers can report wins against undertrained baselines.
@@ -128,18 +128,18 @@ Zero-shot embedders collapse at corpus scale (59.3--66.7 R@1) despite their STS-
 \label{fig:frontier}
 \end{figure}
 
-\subsection{The budget-matched control}
-Table~\ref{tab:budget} reports the control that this paper's claims rest on. At 3 epochs the fine-tuned teacher scores 79.0 R@1 / 81.3 HardR@1 (1-vs-20) and \emph{loses} to \nano{} by 7 points; at 30 epochs it scores 99.0 and wins by 7. Any comparison of a task-trained small model against a lightly fine-tuned large one---in either direction---is unsound without budget disclosure. We report all \nano{}-vs-teacher statistics against the 30-epoch model.
+\subsection{Fine-tuning schedule control}
+Table~\ref{tab:budget} reports the control that this paper's comparative claims rest on. At 3 epochs the fine-tuned teacher scores 79.0 R@1 / 81.3 HardR@1 (1-vs-20) and trails \nano{} by 7 points; at 30 epochs it reaches 99.0 and leads by 7. Any comparison of a task-trained small model against a lightly fine-tuned baseline is unsound without schedule disclosure. We report all \nano{}-vs-teacher comparisons against the 30-epoch model.
 
 \begin{table}[t]
 \centering\small
-\caption{Budget-matched control (1-vs-20 protocol). Reversal of the ranking between 3 and 30 fine-tuning epochs motivates mandatory budget disclosure for baseline fine-tuning.}
+\caption{Fine-tuning schedule control (1-vs-20 protocol). Reversal of the ranking between 3 and 30 fine-tuning epochs motivates mandatory schedule disclosure for baseline fine-tuning.}
 \label{tab:budget}
 \begin{tabular}{lrrrrr}
 \toprule
 System & Steps & R@1 & HardR@1 & hard margin & STS-B $\rho$ \\
 \midrule
-\nano{} V5 (ours, 30 ep) & 5{,}250 & 92.0 & 92.3 & $+0.175$ & 65.3 \\   % FIX 5: stray "\ " removed
+\nano{} V5 (ours, 30 ep) & 5{,}250 & 92.0 & 92.3 & $+0.175$ & 65.3 \\
 MiniLM-FT, 3 epochs & 195 & 79.0 & 81.3 & $+0.106$ & 86.8 \\
 MiniLM-FT, 30 epochs & 1{,}950 & 99.0 & 99.0 & $+0.439$ & 86.2 \\
 \bottomrule
@@ -147,7 +147,7 @@ MiniLM-FT, 30 epochs & 1{,}950 & 99.0 & 99.0 & $+0.439$ & 86.2 \\
 \end{table}
 
 \subsection{Robustness to candidate-set scale}
-Figure~\ref{fig:degradation} tracks R@1 as the candidate pool grows from 20 to 1{,}245. \nano{} degrades least ($-4.0$), the saturated teacher $-7.0$, BGE $-9.7$, zero-shot MiniLM $-15.7$, and Hing-RoBERTa $-24.3$, falling \emph{below} zero-shot MiniLM at scale. Figure~\ref{fig:margin} shows the cause: degradation is predicted by the 1-vs-20 hard-negative margin (Pearson $r=0.73$ across the seven systems\footnote{Exact value printed by the figure script; dominated by the TinyBERT extreme.}). Hing-RoBERTa's compressed cosine space ($+0.03$ margin) ranks gold first among few candidates but cannot survive 1{,}245; margin, not R@1 on small candidate sets, is the quantity that generalizes. This is why our protocol reports both.
+Figure~\ref{fig:degradation} tracks R@1 as the candidate pool grows from 20 to 1{,}245. \nano{} degrades least ($-4.0$), the saturated teacher $-7.0$, BGE $-9.7$, zero-shot MiniLM $-15.7$, and Hing-RoBERTa $-24.3$, falling \emph{below} zero-shot MiniLM at scale. Figure~\ref{fig:margin} illustrates the underlying mechanism: degradation is correlated with the 1-vs-20 hard-negative margin (Pearson $r=0.73$ across the seven evaluated models\footnote{Exact value printed by the evaluation script; reflects margin trends across tested systems.}). Hing-RoBERTa's compressed cosine space ($+0.03$ margin) ranks gold first among few candidates but cannot survive 1{,}245; margin, not R@1 on small candidate sets, is the quantity that generalizes. This is why our protocol reports both.
 
 \begin{figure}[t]
 \centering
@@ -159,12 +159,12 @@ Figure~\ref{fig:degradation} tracks R@1 as the candidate pool grows from 20 to 1
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.5\textwidth]{fig_margin.pdf}
-\caption{Hard-negative margin (small-candidate protocol) vs.\ full-corpus R@1. Margin predicts scale robustness; systems with near-zero or negative margins collapse when the candidate pool grows.}
+\caption{Hard-negative margin (small-candidate protocol) vs.\ full-corpus R@1. Margin correlates with scale robustness; systems with near-zero or negative margins collapse when the candidate pool grows.}
 \label{fig:margin}
 \end{figure}
 
 \subsection{Latency and footprint}
-Figure~\ref{fig:latency}. \nano{} FP32 is the fastest usable embedder measured ($P_{50}$ 8.3\,ms, 120 QPS single-thread); TinyBERT-INT8 is latency-comparable (8.6\,ms) but unusable as an embedder (R@1 2.3), so we claim \emph{fastest usable}, not fastest. \nano{} INT8 is $1.9\times$ faster than the fine-tuned teacher (9.2 vs.\ 17.0\,ms), $3.6\times$ BGE, $11.9\times$ Hing-RoBERTa. Our own dynamic INT8 is 11\% slower than our FP32 at batch 1---INT8 is the \emph{footprint} decision (7.7 vs.\ 29.8\,MB, $3.9\times$), FP32 the latency decision; both configurations are reported and quantization is quality-free (identical retrieval and STS-B to within one query and 0.03 $\rho$).
+Figure~\ref{fig:latency}. \nano{} FP32 is the fastest usable embedder measured ($P_{50}$ 8.3\,ms, 120 QPS single-thread); TinyBERT-INT8 is latency-comparable (8.6\,ms) but unusable as an embedder (R@1 2.3), so we claim \emph{fastest usable}, not fastest. \nano{} INT8 is $1.9\times$ faster than the fine-tuned teacher (9.2 vs.\ 17.0\,ms), $3.6\times$ BGE, $11.9\times$ Hing-RoBERTa. Our own dynamic INT8 is 11\% slower than our FP32 at batch 1---INT8 is the \emph{footprint} decision (7.7 vs.\ 29.8\,MB, $3.9\times$), FP32 the latency decision; both configurations are reported and quantization exhibits no measurable degradation within evaluation resolution (identical retrieval and STS-B to within one query and 0.03 $\rho$).
 
 \begin{figure}[t]
 \centering
@@ -174,7 +174,7 @@ Figure~\ref{fig:latency}. \nano{} FP32 is the fastest usable embedder measured (
 \end{figure}
 
 \subsection{English STS-B: the specialization trade-off}
-\nano{} scores $\rho=65.3$ [62.3, 68.3], statistically indistinguishable from Hing-RoBERTa (64.9 [61.7, 67.9]) and TinyBERT (62.9), and $21.4$--$23.6$ points below MiniLM/BGE. This is the declared cost of a 7.77M domain-specialized student; we do not claim general-purpose embedding capability. Notably, the fine-tuned teacher \emph{retains} its English STS-B (86.2), so the in-domain gap between student and teacher is not explained by specialization damage in the teacher.
+\nano{} scores $\rho=65.3$ [62.3, 68.3], comparable to Hing-RoBERTa (64.9 [61.7, 67.9]) and TinyBERT (62.9), and $21.4$--$23.6$ points below MiniLM/BGE. This is the declared cost of a 7.77M domain-specialized student; we do not claim general-purpose embedding capability. Notably, the fine-tuned teacher \emph{retains} its English STS-B (86.2), so the in-domain gap between student and teacher is not explained by specialization damage in the teacher.
 
 \subsection{Multi-task heads (held-out)}
 \begin{table}[t]
@@ -207,7 +207,7 @@ The gate performs solidly on information-bearing utterances but suppresses only 
 (7) The corpus is proprietary; the held-out test split, scripts, and per-query results are released to mitigate but not eliminate this.
 
 \section{Conclusion and Future Work}
-\nano{}-V5 demonstrates that a sub-8\,MB multi-task encoder can hold deployment-grade retrieval fidelity---top-10 recall statistically tied with a budget-matched fine-tuned teacher $2.9\times$ its size---while paying a quantified, disclosed price in top-1 precision and general-purpose STS. Future work, in order of expected payoff: checkpoint selection by held-out retrieval metric rather than composite score; filtering identity-positive pairs from the contrastive loss; consuming both curated hard negatives; moving the chatter augmentation into the training split and extending it with evaluative and reactive utterances; trimming the embedding vocabulary; LinCE \texttt{ner\_hineng} evaluation; and store-scale testing beyond $10^4$ candidates.
+\nano{}-V5 demonstrates that a sub-8\,MB multi-task encoder can achieve high retrieval fidelity---top-10 recall statistically comparable with a fine-tuned teacher $2.9\times$ its size---while paying a quantified, disclosed price in top-1 precision and general-purpose STS. Future work, in order of expected payoff: checkpoint selection by held-out retrieval metric rather than composite score; filtering identity-positive pairs from the contrastive loss; consuming both curated hard negatives; moving the chatter augmentation into the training split and extending it with evaluative and reactive utterances; trimming the embedding vocabulary; LinCE \texttt{ner\_hineng} evaluation; and store-scale testing beyond $10^4$ candidates.
 
 \section*{Reproducibility}
 Environment: Intel Xeon @2.0\,GHz (2 physical cores), 33.7\,GB RAM; Python 3.12.13, PyTorch 2.10.0, ONNX Runtime 1.30.0; all inference single-thread (torch and ORT pinned). We release: the 300-query test set with golds and the 1{,}245-memory candidate store; the full benchmark suite (both retrieval protocols, STS-B, latency, paired statistics); per-query rankings (\texttt{benchmark\_results\_v3.json}); figure-generation scripts; and the model artifacts at \url{https://github.com/unshakensoul17/HinglishNano_Reserach_paper} and Hugging Face Hub at \url{https://huggingface.co/unsahkensoul18/Hinglishnano_V5}.
